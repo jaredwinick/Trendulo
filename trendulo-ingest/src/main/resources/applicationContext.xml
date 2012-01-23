@@ -2,9 +2,18 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans
 	http://www.springframework.org/schema/beans/spring-beans-3.1.xsd">
+
+	<bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="location">
+			<value>classpath:ingest.properties</value>
+		</property>
+	</bean>
+
+	<bean id="twitterFileStringSequenceSource" class="trendulo.ingest.twitter.TwitterFileStringSequenceSource">
+		<constructor-arg value="${ingest.twitterFilePath}" />
+	</bean>
 	
-	
-	<bean id="hello" class="trendulo.ingest.Hello">
-		<property name="name" value="Jared" />
+	<bean id="nGramSource" class="trendulo.ingest.TemporalNGramSource">
+		<constructor-arg ref="twitterFileStringSequenceSource" />
 	</bean>
 </beans>
