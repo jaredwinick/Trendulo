@@ -29,6 +29,8 @@ public class TemporalNGramSource implements Runnable {
 	private ArrayBlockingQueue<TemporalNGram> queue;
 	private TemporalStringSequenceSource temporalStringSequenceSource;
 	private boolean shutdown = false;
+	private int nStart;
+	private int nEnd;
 	
 	private Logger log = Logger.getLogger( TemporalNGramSource.class );
 	
@@ -57,12 +59,12 @@ public class TemporalNGramSource implements Runnable {
 			log.trace( String.format( "[%d] [%s]", temporalStringSequence.getTimestamp(), cleanedStringSequence ));
 			
 			// Generate the list of n-grams from the string sequence
-			List<String> nGrams = NGramGenerator.generateAllNGramsInRange( cleanedStringSequence, 1, 3 );
+			List<String> nGrams = NGramGenerator.generateAllNGramsInRange( cleanedStringSequence, nStart, nEnd );
 			
 			// For each n-gram, build a TemporalNGram and add it to the queue
 			for ( String nGram : nGrams ) {
 				try {
-					log.debug( nGram );
+					log.trace( nGram );
 					queue.put( new TemporalNGram( nGram, temporalStringSequence.getTimestamp() ) );
 				} catch (InterruptedException e) {
 					log.error( "Error while waiting for free space to become available on queue", e );
@@ -85,5 +87,21 @@ public class TemporalNGramSource implements Runnable {
 	 */
 	private String cleanStringSequence( String stringSequence ) {
 		return stringSequence.replaceAll( "\\.|,|!|\\?|\\(|\\)|\\r|\\n", "" );
+	}
+
+	public int getnStart() {
+		return nStart;
+	}
+
+	public void setnStart(int nStart) {
+		this.nStart = nStart;
+	}
+
+	public int getnEnd() {
+		return nEnd;
+	}
+
+	public void setnEnd(int nEnd) {
+		this.nEnd = nEnd;
 	}
 }

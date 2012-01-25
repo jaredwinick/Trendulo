@@ -15,5 +15,11 @@
 	
 	<bean id="nGramSource" class="trendulo.ingest.TemporalNGramSource">
 		<constructor-arg ref="twitterFileStringSequenceSource" />
+		<property name="nStart" value="${ingest.nStart}"/>
+		<property name="nEnd" value="${ingest.nEnd}"/>
+	</bean>
+	
+	<bean id="nGramIngester" class="trendulo.ingest.TemporalNGramIngester">
+		<constructor-arg ref="nGramSource" />
 	</bean>
 </beans>

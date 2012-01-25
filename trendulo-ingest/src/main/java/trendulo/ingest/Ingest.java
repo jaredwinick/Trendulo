@@ -27,13 +27,21 @@ public class Ingest {
 	public static void main(String[] args) {
 		
 		ApplicationContext context = new ClassPathXmlApplicationContext( "applicationContext.xml" );
+		
+		// Start the N-Gram Source
 		final TemporalNGramSource nGramSource = (TemporalNGramSource) context.getBean( "nGramSource" );
 		Thread nGramSourceThread = new Thread( nGramSource );
 		nGramSourceThread.start();
 		
+		// Start the N-Gram Ingester that will take from the source
+		final TemporalNGramIngester nGramIngester = (TemporalNGramIngester) context.getBean( "nGramIngester" );
+		Thread nGramIngesterThread = new Thread( nGramIngester );
+		nGramIngesterThread.start();
+		
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 		    public void run() { 
 		    	nGramSource.shutdown();
+		    	nGramIngester.shutdown();
 		     }
 		 });
 	}
