@@ -1,0 +1,10 @@
+Run the following from the Accumulo shell
+
+root@trendulo> createtable tweets                                                                                                    
+root@trendulo tweets> setiter -t tweets -p 10 -scan -minc -majc -n monthcount -class org.apache.accumulo.core.iterators.user.SummingCombiner
+SummingCombiner interprets Values as Longs and adds them together.  A variety of encodings (variable length, fixed length, or string) are available
+----------> set SummingCombiner parameter all, set to true to apply Combiner to every column, otherwise leave blank. if true, columns option will be ignored.: true
+----------> set SummingCombiner parameter columns, <col fam>[:<col qual>]{,<col fam>[:<col qual>]} escape non-alphanum chars using %<hex>.: 
+----------> set SummingCombiner parameter lossy, if true, failed decodes are ignored. Otherwise combiner will error on failed decodes (default false): <TRUE|FALSE>: FALSE
+----------> set SummingCombiner parameter type, <VARLEN|FIXEDLEN|STRING|fullClassName>: VARLEN  
+root@trendulo tweets> 
