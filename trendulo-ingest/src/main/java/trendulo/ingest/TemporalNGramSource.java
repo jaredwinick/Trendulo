@@ -86,7 +86,7 @@ public class TemporalNGramSource implements Runnable {
 	 * @return The cleaned string with characters removed
 	 */
 	private String cleanStringSequence( String stringSequence ) {
-		return stringSequence.replaceAll( "\\.|,|!|\\?|\\(|\\)|\\r|\\n", "" );
+		return stringSequence.replaceAll( "\\.|,|!|\\?|\\(|\\)|\\r|\\n", "" ).toLowerCase().trim();
 	}
 
 	public int getnStart() {

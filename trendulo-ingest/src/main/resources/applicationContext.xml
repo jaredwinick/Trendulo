@@ -21,5 +21,25 @@
 	
 	<bean id="nGramIngester" class="trendulo.ingest.TemporalNGramIngester">
 		<constructor-arg ref="nGramSource" />
+		<constructor-arg ref="zooKeeperInstance" />
+		<constructor-arg ref="connector" />
+		<constructor-arg ref="batchWriter" />
+	</bean>
+	
+	<bean id="zooKeeperInstance" class="org.apache.accumulo.core.client.ZooKeeperInstance">
+		<constructor-arg value="${ingest.accumulo.instanceName}" />
+		<constructor-arg value="${ingest.accumulo.zooKeepers}" />
+	</bean>
+	
+	<bean id="connector" class="org.apache.accumulo.core.client.Connector" factory-bean="zooKeeperInstance" factory-method="getConnector">
+		<constructor-arg value="${ingest.accumulo.user}" />
+		<constructor-arg value="${ingest.accumulo.pass}" />
+	</bean>
+	
+	<bean id="batchWriter" class="org.apache.accumulo.core.client.BatchWriter" factory-bean="connector" factory-method="createBatchWriter">
+		<constructor-arg value="${ingest.accumulo.tableName}" />
+		<constructor-arg value="${ingest.accumulo.maxMemory}" />
+		<constructor-arg value="${ingest.accumulo.maxLatency}" />
+		<constructor-arg value="${ingest.accumulo.maxWriteThreads}" />
 	</bean>
 </beans>

@@ -69,6 +69,12 @@
     	<version>2.0</version>
     	<scope>provided</scope>
     </dependency>
+    <dependency>
+    	<groupId>org.apache.zookeeper</groupId>
+    	<artifactId>zookeeper</artifactId>
+    	<version>3.3.3-cdh3u2</version>
+    	<scope>provided</scope>
+    </dependency>
   </dependencies>
   
   <repositories>
@@ -77,4 +83,17 @@
       <url>https://repository.cloudera.com/artifactory/cloudera-repos/</url>
     </repository>
  </repositories>
+
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.6</source>
+					<target>1.6</target>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+  
 </project>

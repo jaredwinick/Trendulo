@@ -13,7 +13,7 @@ import org.joda.time.DateTimeZone;
 
 public class MutationGenerator {
 
-	private static Logger log = Logger.getLogger( MutationGeneratorTest.class );
+	private static Logger log = Logger.getLogger( MutationGenerator.class );
 	
 	/**
 	 * Generate a list of Accumulo Mutations for the TemporalNGram. The n-gram string is

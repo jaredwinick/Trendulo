@@ -16,6 +16,7 @@
 
 package trendulo.ingest;
 
+import org.apache.log4j.Logger;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
@@ -25,6 +26,8 @@ public class Ingest {
 	 * @param args
 	 */
 	public static void main(String[] args) {
+		
+		final Logger log = Logger.getLogger( Ingest.class );
 		
 		ApplicationContext context = new ClassPathXmlApplicationContext( "applicationContext.xml" );
 		
@@ -40,6 +43,7 @@ public class Ingest {
 		
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 		    public void run() { 
+		    	log.info( "Shutting Down Ingest..." );
 		    	nGramSource.shutdown();
 		    	nGramIngester.shutdown();
 		     }
