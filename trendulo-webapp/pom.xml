@@ -21,8 +21,79 @@
       <version>4.8.1</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+    	<groupId>org.springframework</groupId>
+    	<artifactId>spring-core</artifactId>
+    	<version>3.1.1.RELEASE</version>
+    </dependency>
+    <dependency>
+    	<groupId>org.springframework</groupId>
+    	<artifactId>spring-web</artifactId>
+    	<version>3.1.1.RELEASE</version>
+    </dependency>
+    <dependency>
+    	<groupId>org.springframework</groupId>
+    	<artifactId>spring-webmvc</artifactId>
+    	<version>3.1.1.RELEASE</version>
+    </dependency>
+    <dependency>
+    	<groupId>org.codehaus.jackson</groupId>
+    	<artifactId>jackson-mapper-asl</artifactId>
+    	<version>1.9.5</version>
+    </dependency>
+    <dependency>
+    	<groupId>org.apache.accumulo</groupId>
+    	<artifactId>accumulo-core</artifactId>
+    	<version>1.4.0-incubating-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+    	<groupId>org.apache.zookeeper</groupId>
+    	<artifactId>zookeeper</artifactId>
+    	<version>3.3.3-cdh3u2</version>
+    </dependency>
+    <dependency>
+    	<groupId>org.apache.hadoop</groupId>
+    	<artifactId>hadoop-core</artifactId>
+    	<version>0.20.2-cdh3u2</version>
+    </dependency>
+    <dependency>
+    	<groupId>joda-time</groupId>
+    	<artifactId>joda-time</artifactId>
+    	<version>2.0</version>
+    </dependency>
   </dependencies>
-  <build>
-    <finalName>trendulo-webapp</finalName>
-  </build>
+	<build>
+		<finalName>trendulo</finalName>
+		<plugins>
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.6</source>
+					<target>1.6</target>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-war-plugin</artifactId>
+				<version>2.2</version>
+				<configuration>
+					<webResources>
+						<resource>
+							<!-- this is relative to the pom.xml directory -->
+							<directory>static</directory>
+							<targetPath>static</targetPath>
+						</resource>
+					</webResources>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+  
+ <repositories>
+    <repository>
+      <id>cloudera.com</id>
+      <url>https://repository.cloudera.com/artifactory/cloudera-repos/</url>
+    </repository>
+ </repositories>
+ 
 </project>
