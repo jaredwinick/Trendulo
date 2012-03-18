@@ -30,6 +30,19 @@ public class TwitterFileStringSequenceSourceTest {
 	}
 	
 	@Test
+	public void testPlainTextFileFileSystemStatusFilter() throws IOException {
+		
+		TemporalStringSequenceSource source = null;
+		source = new TwitterFileStringSequenceSource( "src/test/resources/sampleStatusMessages.json", new USCountryCodeStatusFilter() );
+		
+		TemporalStringSequence status = null;
+		status = source.nextStringSequence();
+		assertEquals( status.getStringSequence(), "Diffused sunlight #BlogRefresh http://t.co/TDyAk9qY" );
+		status = source.nextStringSequence();
+		assertEquals( status, null );
+	}
+	
+	@Test
 	public void testPlainTextFileClasspath() throws IOException {
 		
 		TemporalStringSequenceSource source = null;
@@ -62,6 +75,7 @@ public class TwitterFileStringSequenceSourceTest {
 		status = source.nextStringSequence();
 		assertEquals( status, null );
 	}
+	
 	
 	@Test( expected=FileNotFoundException.class )
 	public void testPlainTextFileFileSystemNotFound() throws IOException {

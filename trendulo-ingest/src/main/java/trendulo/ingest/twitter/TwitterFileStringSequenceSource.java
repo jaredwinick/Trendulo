@@ -19,17 +19,24 @@ public class TwitterFileStringSequenceSource implements TemporalStringSequenceSo
 
 	private String twitterFilePath;
 	private BufferedReader bufferedReader;
+	private StatusFilter statusFilter;
 	private Logger log = Logger.getLogger( TwitterFileStringSequenceSource.class );
+	
+	public TwitterFileStringSequenceSource( String twitterFilePath ) throws IOException {
+		this( twitterFilePath, null );
+	}
 	
 	/**
 	 * Creates a new TwitterFileStringSequenceSource. This class reads a file that has been 
 	 * created by writing the stream of JSON strings from the Twitter Streaming API. 
 	 * @param twitterFilePath The full filesystem path or path on classpath to the file of JSON-serialized Twitter Statuses. 
 	 * 	This file can be plain-text or GZIPed (designated by a .gz extension)
+	 * @param statusFilter a StatusFilter to accept/reject Status messages
 	 * @throws IOException 
 	 */
-	public TwitterFileStringSequenceSource( String twitterFilePath ) throws IOException {
+	public TwitterFileStringSequenceSource( String twitterFilePath, StatusFilter statusFilter ) throws IOException {
 		this.twitterFilePath = twitterFilePath;
+		this.statusFilter = statusFilter;
 		
 		InputStream inputStream = null;
 		
@@ -50,6 +57,7 @@ public class TwitterFileStringSequenceSource implements TemporalStringSequenceSo
 		if ( twitterFilePath.endsWith( ".gz" ) ) {
 			inputStream = new GZIPInputStream( inputStream );
 		}
+		log.debug("Opening file: " + twitterFilePath );
 		bufferedReader = new BufferedReader( new InputStreamReader( inputStream ) );
 		
 		System.setProperty("twitter4j.jsonStoreEnabled", "true");
@@ -60,20 +68,35 @@ public class TwitterFileStringSequenceSource implements TemporalStringSequenceSo
 		TemporalStringSequence temporalStringSequence = null;
 		String line = null;
 		Status status = null;
+		boolean statusAccepted = false;
 		
 		// Read a line from the file and serialize the JSON string into a Status object
 		try {
-			line = bufferedReader.readLine( );
-			if ( line != null ) {
-				status = DataObjectFactory.createStatus( line );
-			}
+			do {
+				line = bufferedReader.readLine( );
+				if ( line != null ) {
+					status = DataObjectFactory.createStatus( line );
+					// if the user has specified a StatusFilter, check to see if the Status object
+					// is accepted. If not, we will continue around the loop
+					if ( statusFilter != null ) {
+						if ( statusFilter.accept( status ) ) {
+							statusAccepted = true;
+						}
+					}
+					// Every status is accepted if there is no filter
+					else {
+						statusAccepted = true;
+					}
+				}
+			} while ( line != null && statusAccepted == false );
+				
 		} catch (IOException e) {
 			log.error( "Error reading from file: " + twitterFilePath, e );
 		} catch (TwitterException e) {
 			log.error( "Error parsing JSON status string: " + line, e );
 		}
 		
-		if ( status != null ) {
+		if ( status != null && statusAccepted == true ) {
 			temporalStringSequence = new TemporalStringSequence( status.getText(), status.getCreatedAt().getTime() );
 		}
 		
