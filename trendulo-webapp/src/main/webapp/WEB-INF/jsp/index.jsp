@@ -22,7 +22,7 @@
           			<a class="brand" href="#">Trendulo</a>
           			
 			       	<form id="searchForm" class="navbar-search pull-right">
-  						<input type="text" id="searchInputText" class="search-query" placeholder="Search">
+  						<input type="text" id="searchInputText" class="search-query" placeholder="Search" value="breakfast,lunch,dinner">
 					</form>
 					<ul class="nav pull-right">
   						<li class="dropdown">
@@ -43,19 +43,37 @@
     	<div class="container">
 
 		<div class="row">
-			<div class="span8">
+			<div class="span7">
 				<div class="page-header">
 					<h1>Timeline 
 						<small id="timelineText">n-gram in last 7 days</small>
 					</h1>
 				</div>			
 			</div>
-			<div class="span4">
+			<div class="span1">
+				<div class="btn-group">
+					<a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+						Y-Axis
+						<span class="caret"></span>
+					</a>
+					<ul class="dropdown-menu">
+						<li><a id="yAxisPercent" href="#">Percent</a></li>
+						<li><a id="yAxisTotalCount" href="#">Total Count</a></li>
+					</ul>
+				</div>
+			</div>
+			<div class="span2">
 				<div class="page-header">
 					<h1>Trends 
-						<small>March 03, 2012</small>
+						<!--<small id="trendsDateString"></small>-->
 					</h1>
 				</div>
+			</div>
+			<div class="span2">
+				<form id="trendDateForm" class="well form-search">
+  					<input type="text" id="trendInputDate" class="input-mini search-query" placeholder="Date" value="20120319">
+  					<!--<button type="submit" class="btn-mini">Search</button>-->
+				</form>
 			</div>
 		</div>
 		
@@ -65,7 +83,7 @@
     			</div>
     		</div>
     		<div class="span4">
-    			<table class="table table-striped">
+    			<table id="trendsTable" class="table table-striped table-condensed">
     				<thead>
     					<tr>
     						<th>n-gram</th>
@@ -73,19 +91,8 @@
     					</tr>
     				</thead>
     				<tbody>
-    					<tr>
-    						<td>jared</td>
-    						<td>1923</td>
-    					</tr>
-    					<tr>
-    						<td>stacy</td>
-    						<td>323</td>
-    					</tr>
-    					<tr>
-    						<td>pooch</td>
-    						<td>19</td>
-    					</tr>
-    				</tbody>
+    				<!-- Filled in dynamically with template-->
+				</tbody>
 				</table>
     		</div>
 		</div>
@@ -93,31 +100,56 @@
 	
 	<script type="text/javascript" src="static/js/jquery-1.7.1/jquery-1.7.1.min.js"></script>
 	<script type="text/javascript" src="static/js/bootstrap/bootstrap.min.js"></script>
+        <script type="text/javascript" src="static/js/mustache/mustache.js"></script>
 	<script type="text/javascript" src="static/js/highstock-1.1.4/js/highstock.src.js"></script>
 	<script type="text/javascript" src="static/js/chart.js"></script>
 	<script type="text/javascript">
 		
-		var days = 1;
+		var days = 7;
+		var yAxisPercent = true;
 		function performSearch() {
-			var searchText = $('#searchInputText').val();
+			var searchText = escape($('#searchInputText').val().toLowerCase());
 			if ( searchText != undefined && searchText != "" ) {
-				buildChart( searchText, days );
-				
-				$('#timelineText').html("[" + searchText + "] in last " + days + " days");
+				buildChart( searchText, days, yAxisPercent );
+				var yAxisType = "";
+				if ( yAxisPercent == true ) {
+					yAxisType = "Percent of ";
+				} else {
+					yAxisType = "Total count of ";
+				}
+				$('#timelineText').html(yAxisType + "[" + unescape(searchText) + "] in last " + days + " days");
 			}
 		}
 		
+		function loadTrends() {
+			var url = "/trendulo/trends/DAY/" + $('#trendInputDate').val();
+			$.getJSON(url, function(data){
+			  //var data = {trends:[{ngram:"test","score":4},{ngram:"cool",score:2}]};
+			  var tableTemplate = "{{#trends}}<tr><td>{{ngram}}</td><td>{{score}}</td></tr>{{/trends}}";
+                          var tbodyHtml = Mustache.to_html( tableTemplate, data );
+			  $('#trendsDateString').html(data.dateString);
+			  $('#trendsTable > tbody').html( tbodyHtml );
+			});
+
+
+		}
     	 $(document).ready(function(){
 	  		$('#searchForm').submit( function() {
 	  			performSearch();
 	  			return false;
 	  		});
+
+			$('#trendDateForm').submit( function(){
+				loadTrends();
+				return false;
+			});
 	  		
 	  		$('#1day').click( function() {
 	  			days = 1;
 	  			performSearch();
 	  		});
 	  		$('#7day').click( function() {
+	  			$('#7day').addClass("active");
 	  			days = 7;
 	  			performSearch();
 	  		});
@@ -134,7 +166,18 @@
 	  			performSearch();
 	  		});
 	  		
+	  		$('#yAxisPercent').click( function() {
+	  			yAxisPercent = true;
+	  			performSearch();
+	  		});
+	  		$('#yAxisTotalCount').click( function() {
+	  			yAxisPercent = false;
+	  			performSearch();
+	  		});
+	  		
+	  		
 	  		performSearch();
+			loadTrends();
 	 	  });
     </script>
 	</body>
