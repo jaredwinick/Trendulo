@@ -40,7 +40,7 @@ public class DateConverterTest {
 	public void getStartDateString30Days() {
 		// timestamp is Human time (GMT): Sat, 31 Mar 2012 01:00:00 GMT
 		String startDate = DateConverter.getStartDateString( 30, 1333155600000l );
-		assertEquals( startDate, "20120301" );
+		assertEquals( startDate, "2012030101" );
 	}
 	@Test 
 	public void getStartDateString60Days() {
@@ -71,7 +71,7 @@ public class DateConverterTest {
 	public void getEndDateString30Days() {
 		// timestamp is Human time (GMT): Sat, 31 Mar 2012 01:00:00 GMT
 		String endDate = DateConverter.getEndDateString( 30, 1333155600000l );
-		assertEquals( endDate, "20120331" );
+		assertEquals( endDate, "2012033101" );
 	}
 	@Test 
 	public void getEndDateString60Days() {

@@ -55,7 +55,7 @@ public class DateConverter {
 	
 	private static DateTimeFormatter getFormatterForDays( int days ) {
 		DateTimeFormatter formatter = null;
-		if ( days > 7 ) { 
+		if ( days > 30 ) { 
 			formatter = DateTimeFormat.forPattern("yyyyMMdd");
 		}
 		else {
