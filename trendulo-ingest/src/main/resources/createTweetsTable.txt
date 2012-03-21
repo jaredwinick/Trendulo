@@ -8,3 +8,4 @@ SummingCombiner interprets Values as Longs and adds them together.  A variety of
 ----------> set SummingCombiner parameter lossy, if true, failed decodes are ignored. Otherwise combiner will error on failed decodes (default false): <TRUE|FALSE>: FALSE
 ----------> set SummingCombiner parameter type, <VARLEN|FIXEDLEN|STRING|fullClassName>: FIXEDLEN  
 root@trendulo tweets> 
+root@trendulo tweets>setgroups DAYGROUP=DAY HOURGROUP=HOUR -t tweets
