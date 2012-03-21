@@ -9,12 +9,25 @@
 		</property>
 	</bean>
 
+<!--
 	<bean id="twitterFileStringSequenceSource" class="trendulo.ingest.twitter.TwitterFileStringSequenceSource">
 		<constructor-arg value="${ingest.twitterFilePath}" />
+		<constructor-arg ref="usCountryCodeStatusFilter" />
+	</bean>
+-->
+
+	<bean id="twitterStreamingStringSequenceSource" class="trendulo.ingest.twitter.TwitterStreamingStringSequenceSource">
+		<constructor-arg index="0" value="${ingest.twitter.username}" />
+		<constructor-arg index="1" value="${ingest.twitter.password}" />
+		<constructor-arg index="2" value="${ingest.archiveFilePath}" />
+		<constructor-arg index="3" ref="usCountryCodeStatusFilter" />
 	</bean>
 	
+	<bean id="usCountryCodeStatusFilter" class="trendulo.ingest.twitter.USCountryCodeStatusFilter"/>
+	
 	<bean id="nGramSource" class="trendulo.ingest.TemporalNGramSource">
-		<constructor-arg ref="twitterFileStringSequenceSource" />
+		<constructor-arg ref="twitterStreamingStringSequenceSource" />
+		<!--  <constructor-arg ref="twitterFileStringSequenceSource" /> -->
 		<property name="nStart" value="${ingest.nStart}"/>
 		<property name="nEnd" value="${ingest.nEnd}"/>
 	</bean>
