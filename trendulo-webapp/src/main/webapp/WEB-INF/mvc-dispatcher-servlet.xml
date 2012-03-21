@@ -1,0 +1,62 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+        http://www.springframework.org/schema/beans     
+        http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+        http://www.springframework.org/schema/context 
+        http://www.springframework.org/schema/context/spring-context-3.1.xsd
+        http://www.springframework.org/schema/mvc
+        http://www.springframework.org/schema/mvc/spring-mvc-3.1.xsd">
+
+	<context:component-scan base-package="trendulo.web.controller" />
+	<context:annotation-config />
+	<mvc:annotation-driven />
+	<mvc:resources mapping="/static/**" location="/static/" />
+
+	<bean id="propertyConfigurer"
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="location">
+			<value>classpath:web.properties</value>
+		</property>
+	</bean>
+	
+	<bean
+		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="prefix">
+			<value>/WEB-INF/jsp/</value>
+		</property>
+		<property name="suffix">
+			<value>.jsp</value>
+		</property>
+	</bean>
+	
+	<bean id="queryService" class="trendulo.web.query.QueryService">
+	</bean>
+	
+	<bean id="zooKeeperInstance" class="org.apache.accumulo.core.client.ZooKeeperInstance">
+		<constructor-arg value="${web.accumulo.instanceName}" />
+		<constructor-arg value="${web.accumulo.zooKeepers}" />
+	</bean>
+	
+	<bean id="connector" class="org.apache.accumulo.core.client.Connector" factory-bean="zooKeeperInstance" factory-method="getConnector">
+		<constructor-arg value="${web.accumulo.user}" />
+		<constructor-arg value="${web.accumulo.pass}" />
+	</bean>
+	
+	<bean id="authorizations" class="org.apache.accumulo.core.security.Authorizations">
+		<constructor-arg value="${web.accumulo.authorizations}" />
+	</bean>
+	
+	<bean id="tweetsBatchScanner" class="org.apache.accumulo.core.client.BatchScanner" factory-bean="connector" factory-method="createBatchScanner">
+		<constructor-arg value="${web.accumulo.tweetsTableName}" />
+		<constructor-arg ref="authorizations" />
+		<constructor-arg value="${web.accumulo.maxReadThreads}" />
+	</bean>
+	
+	<bean id="trendsScanner" class="org.apache.accumulo.core.client.Scanner" factory-bean="connector" factory-method="createScanner">
+		<constructor-arg value="${web.accumulo.trendsTableName}" />
+		<constructor-arg ref="authorizations" />
+	</bean>
+
+</beans>
