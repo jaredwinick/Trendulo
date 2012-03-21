@@ -26,11 +26,46 @@ public class CountsController {
 	@Autowired
 	private QueryService queryService;
 	
+	private final String nGramCounterRowId = "!NGRAMS";
+	
 	private Logger log = Logger.getLogger( CountsController.class );
 	
 	@RequestMapping(value = "/counts/{wordsCsvList}/{days}", method = RequestMethod.GET)
-	public @ResponseBody List<Series> getSeries( @PathVariable String wordsCsvList, @PathVariable int days ) {
+	public @ResponseBody List<Series> getCountsSeries( @PathVariable String wordsCsvList, @PathVariable int days ) {
 		
+		Map<String,SortedMap<String,Long>> wordDateCounters = getWordDateCounters( wordsCsvList, days );;
+		
+		// Build a List of Series for each word and its date counters
+		List<Series> series = new ArrayList<Series>();
+		for ( Entry<String, SortedMap<String,Long>> entry : wordDateCounters.entrySet() ) {
+			series.add( new Series( entry.getKey(), entry.getValue() ) );
+		}
+		return series;
+	}
+	
+	@RequestMapping(value = "/percents/{wordsCsvList}/{days}", method = RequestMethod.GET)
+	public @ResponseBody List<Series> getPercentsSeries( @PathVariable String wordsCsvList, @PathVariable int days ) {
+		
+		// Add the total n-grams key to the list of words
+		wordsCsvList += ("," + nGramCounterRowId);
+		
+		Map<String,SortedMap<String,Long>> wordDateCounters = getWordDateCounters( wordsCsvList, days );
+		
+		// Get the counters for the total n-grams
+		SortedMap<String,Long> totalNGramCounters = wordDateCounters.get( nGramCounterRowId );
+		
+		// Build a List of Series for each word and its date counters
+		List<Series> series = new ArrayList<Series>();
+		for ( Entry<String, SortedMap<String,Long>> entry : wordDateCounters.entrySet() ) {
+			// only add to the series for real words, not the total n-grams
+			if ( !entry.getKey().equals( nGramCounterRowId ) ) {
+				series.add( new Series( entry.getKey(), entry.getValue(), totalNGramCounters ) );
+			}
+		}
+		return series;
+	}
+	
+	private Map<String,SortedMap<String,Long>> getWordDateCounters( String wordsCsvList, int days ) {
 		log.debug( "Words:" + wordsCsvList );
 		log.debug( "Days:" + days );
 		
@@ -43,11 +78,8 @@ public class CountsController {
 		String endDateString = DateConverter.getEndDateString( days, currentTime.getMillis() );
 		Map<String,SortedMap<String,Long>> wordDateCounters = queryService.getCounts( words, startDateString, endDateString );
 		
-		// Build a List of Series for each word and its date counters
-		List<Series> series = new ArrayList<Series>();
-		for ( Entry<String, SortedMap<String,Long>> entry : wordDateCounters.entrySet() ) {
-			series.add( new Series( entry.getKey(), entry.getValue() ) );
-		}
-		return series;
+		return wordDateCounters;
 	}
+	
+	
 }
