@@ -14,6 +14,7 @@ import org.apache.accumulo.core.client.Connector;
 import org.apache.accumulo.core.client.Instance;
 import org.apache.accumulo.core.client.Scanner;
 import org.apache.accumulo.core.data.Key;
+import org.apache.accumulo.core.data.PartialKey;
 import org.apache.accumulo.core.data.Range;
 import org.apache.accumulo.core.data.Value;
 import org.apache.hadoop.io.Text;
@@ -70,10 +71,14 @@ public class QueryService {
 		List<Range> ranges = new ArrayList<Range>();
 		for ( String word : words ) {
 			Key startKey = new Key( new Text( word ), new Text( dateGranularity ), new Text( startDateString ) );
-			Key endKey = new Key( new Text( word ), new Text( dateGranularity ), new Text( endDateString ) );
+			// We want the endKey to include the endDateString, so we will build the Key just following it but then
+			// set the Range to be exclusive. Simply using the endDateString and making the Range inclusive doesn't
+			// work because of the default Value of the Key's timestamp (Long.MAX_VALUE)
+			// See "Bug in Range behavior?" message on Accumulo user mailing list on Mar 22, 2012
+			Key endKey = new Key( new Text( word ), new Text( dateGranularity ), new Text( endDateString ) ).followingKey(PartialKey.ROW_COLFAM_COLQUAL);
 			log.debug( "Start Key: " + startKey.toStringNoTime() );
 			log.debug( "End Key: " + endKey.toStringNoTime() );
-			Range range = new Range( startKey, endKey );
+			Range range = new Range( startKey, true, endKey, false );
 			ranges.add( range );
 		}
 		
