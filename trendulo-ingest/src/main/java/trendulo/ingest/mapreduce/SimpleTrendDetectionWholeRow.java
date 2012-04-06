@@ -19,6 +19,7 @@ import org.apache.accumulo.core.data.Key;
 import org.apache.accumulo.core.data.Mutation;
 import org.apache.accumulo.core.data.Range;
 import org.apache.accumulo.core.data.Value;
+import org.apache.accumulo.core.iterators.LongCombiner;
 import org.apache.accumulo.core.iterators.user.WholeRowIterator;
 import org.apache.accumulo.core.security.Authorizations;
 import org.apache.accumulo.core.util.CachedConfiguration;
@@ -109,7 +110,7 @@ public class SimpleTrendDetectionWholeRow extends Configured implements Tool {
 				long [] counts = new long[2];
 				int index = 0;
 				for ( Entry<Key,Value> entry : entries.entrySet() ) {
-					counts[index++] = Value.bytesToLong(entry.getValue().get());
+					counts[index++] = LongCombiner.VAR_LEN_ENCODER.decode( entry.getValue().get());
 				}
 				
 				// Generate a trending score for this ngram
@@ -212,11 +213,11 @@ public class SimpleTrendDetectionWholeRow extends Configured implements Tool {
 		Scanner scanner = connector.createScanner( inputTable, new Authorizations());
 		scanner.fetchColumn(new Text(timeGranularity),new Text(timeValue0));
 		scanner.fetchColumn(new Text(timeGranularity),new Text(timeValue1));
-		scanner.setRange( new Range("!NGRAMS") );
+		scanner.setRange( new Range("!TWEETS") );
 		long totalCounts[] = new long[2];
 		int index = 0;
 		for ( Entry<Key,Value> entry : scanner ) {
-			totalCounts[index++] = Value.bytesToLong( entry.getValue().get() );
+			totalCounts[index++] = LongCombiner.VAR_LEN_ENCODER.decode( entry.getValue().get() );
 		}
 		
 		return totalCounts;
