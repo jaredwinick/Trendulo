@@ -1,6 +1,7 @@
 package trendulo.ingest.twitter;
 
 import java.io.BufferedOutputStream;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -16,7 +17,6 @@ import twitter4j.FilterQuery;
 import twitter4j.Status;
 import twitter4j.StatusDeletionNotice;
 import twitter4j.StatusListener;
-import twitter4j.TwitterException;
 import twitter4j.TwitterStream;
 import twitter4j.TwitterStreamFactory;
 import twitter4j.auth.Authorization;
@@ -49,6 +49,11 @@ public class TwitterStreamingStringSequenceSource implements
 		// If the user wants status messages archived, create an OutputStream
 		if ( archiveTwitterFilePath != null ) {
 			try {
+				// Verify that the file doesn't already exist so we don't clobber the archive
+				if ( new File( archiveTwitterFilePath).exists() ) {
+					throw new RuntimeException( "Archive File Already Exists. Please move/rename before starting Ingest: " + archiveTwitterFilePath );
+				}
+				
 				FileOutputStream fos = new FileOutputStream( archiveTwitterFilePath );
 				if ( archiveTwitterFilePath.endsWith("gz") ) {
 					archiveOutputStream = new GZIPOutputStream( new BufferedOutputStream( fos ) );
@@ -71,8 +76,9 @@ public class TwitterStreamingStringSequenceSource implements
 		
 		// We only want status messages with a geo. This needs to be pulled
 		// out so it is configurable
+		// Right now just the lower 48 of the US
 		FilterQuery filterQuery = new FilterQuery();
-		double [][] locations = {{-180.0,-90.0},{180.0,90.0}};
+		double [][] locations = {{-126.0,24.0},{-67.0,49.0}};
 		filterQuery.locations(locations);
 		twitterStream.filter( filterQuery );
 	}
