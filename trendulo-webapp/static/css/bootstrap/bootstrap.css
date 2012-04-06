@@ -2513,7 +2513,7 @@ button.btn.small, input[type="submit"].btn.small {
 .navbar .brand {
   float: left;
   display: block;
-  padding: 8px 10px 12px;
+  padding:8px 10px 12px 20px;
   margin-left: -20px;
   font-size: 20px;
   font-weight: 200;
