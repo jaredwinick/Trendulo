@@ -8,6 +8,7 @@ import java.util.Arrays;
 
 import org.apache.accumulo.core.data.Mutation;
 import org.apache.accumulo.core.data.Value;
+import org.apache.accumulo.core.iterators.LongCombiner;
 import org.junit.Test;
 
 public class MutationGeneratorTest {
@@ -32,18 +33,69 @@ public class MutationGeneratorTest {
 		TemporalNGram temporalNGram = new TemporalNGram( "trendulo is great", 1327470661000L );
 		Mutation mutation = MutationGenerator.generateMutation( temporalNGram );
 		assertTrue( Arrays.equals( mutation.getRow(), "trendulo is great".getBytes() ) );
-		assertEquals( mutation.getUpdates().size(), 3 );
+		assertEquals( mutation.getUpdates().size(), 2 );
+		/* Decided we don't need to keep month info around (JDW - 03-24-2012)
 		assertTrue( Arrays.equals( mutation.getUpdates().get(0).getColumnFamily(), "MONTH".getBytes() ) );
 		assertTrue( Arrays.equals( mutation.getUpdates().get(0).getColumnQualifier(), "201201".getBytes() ) );
 		assertTrue( Arrays.equals( mutation.getUpdates().get(0).getValue(), Value.longToBytes(1) ) );
+		*/
+		assertTrue( Arrays.equals( mutation.getUpdates().get(0).getColumnFamily(), "DAY".getBytes() ) );
+		assertTrue( Arrays.equals( mutation.getUpdates().get(0).getColumnQualifier(), "20120125".getBytes() ) );
+		assertTrue( Arrays.equals( mutation.getUpdates().get(0).getValue(), Value.longToBytes(1) ) );
 		
-		assertTrue( Arrays.equals( mutation.getUpdates().get(1).getColumnFamily(), "DAY".getBytes() ) );
-		assertTrue( Arrays.equals( mutation.getUpdates().get(1).getColumnQualifier(), "20120125".getBytes() ) );
+		assertTrue( Arrays.equals( mutation.getUpdates().get(1).getColumnFamily(), "HOUR".getBytes() ) );
+		assertTrue( Arrays.equals( mutation.getUpdates().get(1).getColumnQualifier(), "2012012505".getBytes() ) );
 		assertTrue( Arrays.equals( mutation.getUpdates().get(1).getValue(), Value.longToBytes(1) ) );
+	}
+	
+	@Test
+	public void testGenerateMutationWithCount() throws IOException {
+		TemporalNGram temporalNGram = new TemporalNGram( "trendulo is great", 1327470661000L );
+		Mutation mutation = MutationGenerator.generateMutation( temporalNGram, 36l );
+		assertTrue( Arrays.equals( mutation.getRow(), "trendulo is great".getBytes() ) );
+		assertEquals( mutation.getUpdates().size(), 2 );
+
+		assertTrue( Arrays.equals( mutation.getUpdates().get(0).getColumnFamily(), "DAY".getBytes() ) );
+		assertTrue( Arrays.equals( mutation.getUpdates().get(0).getColumnQualifier(), "20120125".getBytes() ) );
+		assertTrue( Arrays.equals( mutation.getUpdates().get(0).getValue(), Value.longToBytes(36) ) );
 		
-		assertTrue( Arrays.equals( mutation.getUpdates().get(2).getColumnFamily(), "HOUR".getBytes() ) );
-		assertTrue( Arrays.equals( mutation.getUpdates().get(2).getColumnQualifier(), "2012012505".getBytes() ) );
-		assertTrue( Arrays.equals( mutation.getUpdates().get(2).getValue(), Value.longToBytes(1) ) );
+		assertTrue( Arrays.equals( mutation.getUpdates().get(1).getColumnFamily(), "HOUR".getBytes() ) );
+		assertTrue( Arrays.equals( mutation.getUpdates().get(1).getColumnQualifier(), "2012012505".getBytes() ) );
+		assertTrue( Arrays.equals( mutation.getUpdates().get(1).getValue(), Value.longToBytes(36) ) );
+	}
+	
+	@Test
+	public void testGenerateMutationVLen() throws IOException {
+		TemporalNGram temporalNGram = new TemporalNGram( "trendulo is great", 1327470661000L );
+		Mutation mutation = MutationGenerator.generateMutationVLen( temporalNGram );
+		assertTrue( Arrays.equals( mutation.getRow(), "trendulo is great".getBytes() ) );
+		assertEquals( mutation.getUpdates().size(), 2 );
+
+		assertTrue( Arrays.equals( mutation.getUpdates().get(0).getColumnFamily(), "DAY".getBytes() ) );
+		assertTrue( Arrays.equals( mutation.getUpdates().get(0).getColumnQualifier(), "20120125".getBytes() ) );
+		assertTrue( Arrays.equals( mutation.getUpdates().get(0).getValue(), LongCombiner.VAR_LEN_ENCODER.encode(1l) ) );
+		
+		assertTrue( Arrays.equals( mutation.getUpdates().get(1).getColumnFamily(), "HOUR".getBytes() ) );
+		assertTrue( Arrays.equals( mutation.getUpdates().get(1).getColumnQualifier(), "2012012505".getBytes() ) );
+		assertTrue( Arrays.equals( mutation.getUpdates().get(1).getValue(), LongCombiner.VAR_LEN_ENCODER.encode(1l) ) );
+	}
+	
+	@Test
+	public void testGenerateMutationVLenWithCount() throws IOException {
+		
+		Long longNumber = 36363636l;
+		TemporalNGram temporalNGram = new TemporalNGram( "trendulo is great", 1327470661000L );
+		Mutation mutation = MutationGenerator.generateMutationVLen( temporalNGram, longNumber );
+		assertTrue( Arrays.equals( mutation.getRow(), "trendulo is great".getBytes() ) );
+		assertEquals( mutation.getUpdates().size(), 2 );
+
+		assertTrue( Arrays.equals( mutation.getUpdates().get(0).getColumnFamily(), "DAY".getBytes() ) );
+		assertTrue( Arrays.equals( mutation.getUpdates().get(0).getColumnQualifier(), "20120125".getBytes() ) );
+		assertTrue( Arrays.equals( mutation.getUpdates().get(0).getValue(), LongCombiner.VAR_LEN_ENCODER.encode(longNumber) ) );
+		
+		assertTrue( Arrays.equals( mutation.getUpdates().get(1).getColumnFamily(), "HOUR".getBytes() ) );
+		assertTrue( Arrays.equals( mutation.getUpdates().get(1).getColumnQualifier(), "2012012505".getBytes() ) );
+		assertTrue( Arrays.equals( mutation.getUpdates().get(1).getValue(), LongCombiner.VAR_LEN_ENCODER.encode(longNumber) ) );
 	}
 
 }
