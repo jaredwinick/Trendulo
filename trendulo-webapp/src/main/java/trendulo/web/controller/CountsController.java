@@ -26,10 +26,13 @@ public class CountsController {
 	@Autowired
 	private QueryService queryService;
 	
-	private final String nGramCounterRowId = "!NGRAMS";
+	// totalRowId is either !NGRAMS or !TWEETS. It is required to be passed in to the ctor
+	@Autowired
+	public String totalRowId;
 	
 	private Logger log = Logger.getLogger( CountsController.class );
 	
+	/*
 	@RequestMapping(value = "/counts/{wordsCsvList}/{days}", method = RequestMethod.GET)
 	public @ResponseBody List<Series> getCountsSeries( @PathVariable String wordsCsvList, @PathVariable int days ) {
 		
@@ -42,26 +45,33 @@ public class CountsController {
 		}
 		return series;
 	}
+	*/
 	
 	@RequestMapping(value = "/percents/{wordsCsvList}/{days}", method = RequestMethod.GET)
 	public @ResponseBody List<Series> getPercentsSeries( @PathVariable String wordsCsvList, @PathVariable int days ) {
 		
 		// Add the total n-grams key to the list of words
-		wordsCsvList += ("," + nGramCounterRowId);
+		String wordsCsvListPlusTotal = (wordsCsvList + "," + totalRowId);
 		
-		Map<String,SortedMap<String,Long>> wordDateCounters = getWordDateCounters( wordsCsvList, days );
+		Map<String,SortedMap<String,Long>> wordDateCounters = getWordDateCounters( wordsCsvListPlusTotal, days );
 		
 		// Get the counters for the total n-grams
-		SortedMap<String,Long> totalNGramCounters = wordDateCounters.get( nGramCounterRowId );
+		SortedMap<String,Long> totalNGramCounters = wordDateCounters.get( totalRowId );
 		
-		// Build a List of Series for each word and its date counters
+		// Build a List of Series for each word and its date counters.
+		// Iterate from the original wordsCsvList so the series is returned in the order queried
 		List<Series> series = new ArrayList<Series>();
+		for ( String word : wordsCsvList.split(",") ) {
+			series.add( new Series( word, wordDateCounters.get( word ), totalNGramCounters ) );
+		}
+		/*
 		for ( Entry<String, SortedMap<String,Long>> entry : wordDateCounters.entrySet() ) {
 			// only add to the series for real words, not the total n-grams
-			if ( !entry.getKey().equals( nGramCounterRowId ) ) {
+			if ( !entry.getKey().equals( totalRowId ) ) {
 				series.add( new Series( entry.getKey(), entry.getValue(), totalNGramCounters ) );
 			}
 		}
+		*/
 		return series;
 	}
 	
