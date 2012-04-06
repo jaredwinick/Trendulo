@@ -17,6 +17,8 @@ import org.apache.accumulo.core.data.Key;
 import org.apache.accumulo.core.data.PartialKey;
 import org.apache.accumulo.core.data.Range;
 import org.apache.accumulo.core.data.Value;
+import org.apache.accumulo.core.iterators.LongCombiner;
+import org.apache.accumulo.core.iterators.aggregation.LongSummation;
 import org.apache.hadoop.io.Text;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -101,12 +103,8 @@ public class QueryService {
 			String dateValue = entry.getKey().getColumnQualifier().toString();
 			
 			// Now get the counter value
-			try {
-				count = Value.bytesToLong( entry.getValue().get() );
-			} catch (IOException e) {
-				log.error( "Can't parse Value to long", e );
-			}
-			
+			count = LongCombiner.VAR_LEN_ENCODER.decode( entry.getValue().get() );
+		
 			// add the date and count to the dateCounters SortedMap
 			dateCounters.put( dateValue, count );
 		}
