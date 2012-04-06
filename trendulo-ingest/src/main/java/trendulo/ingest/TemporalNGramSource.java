@@ -16,6 +16,7 @@
 
 package trendulo.ingest;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 
@@ -26,7 +27,7 @@ public class TemporalNGramSource implements Runnable {
 	public final static int DEFAULT_BUFFER_SIZE = 10000;
 	
 	private int bufferSize;
-	private ArrayBlockingQueue<TemporalNGram> queue;
+	private ArrayBlockingQueue<List<TemporalNGram>> queue;
 	private TemporalStringSequenceSource temporalStringSequenceSource;
 	private boolean shutdown = false;
 	private int nStart;
@@ -42,10 +43,15 @@ public class TemporalNGramSource implements Runnable {
 		this.temporalStringSequenceSource = temporalStringSequenceSource;
 		this.bufferSize = bufferSize;
 		
-		queue = new ArrayBlockingQueue<TemporalNGram>( bufferSize );
+		queue = new ArrayBlockingQueue<List<TemporalNGram>>( bufferSize );
 	}
 	
-	public TemporalNGram take( ) throws InterruptedException {
+	/**
+	 * Returns a List of TemporalNGrams for a giving TemporalStringSequence
+	 * @return
+	 * @throws InterruptedException
+	 */
+	public List<TemporalNGram> take( ) throws InterruptedException {
 		return queue.take();
 	}
 
@@ -55,21 +61,23 @@ public class TemporalNGramSource implements Runnable {
 		
 		// loop until there is are no more strings or we have been asked to shutdown
 		while ( ( temporalStringSequence = temporalStringSequenceSource.nextStringSequence() ) != null && shutdown == false ) {
-			String cleanedStringSequence = cleanStringSequence( temporalStringSequence.getStringSequence() );
+			String cleanedStringSequence = StringUtilities.cleanStringSequence( temporalStringSequence.getStringSequence() );
 			log.trace( String.format( "[%d] [%s]", temporalStringSequence.getTimestamp(), cleanedStringSequence ));
 			
 			// Generate the list of n-grams from the string sequence
 			List<String> nGrams = NGramGenerator.generateAllNGramsInRange( cleanedStringSequence, nStart, nEnd );
 			
-			// For each n-gram, build a TemporalNGram and add it to the queue
+			// For each n-gram, build a TemporalNGram and build a List which we will put on the queue
+			List<TemporalNGram> temporalNGrams = new ArrayList<TemporalNGram>( nGrams.size() );
 			for ( String nGram : nGrams ) {
-				try {
-					log.trace( nGram );
-					queue.put( new TemporalNGram( nGram, temporalStringSequence.getTimestamp() ) );
-				} catch (InterruptedException e) {
-					log.error( "Error while waiting for free space to become available on queue", e );
-				}
-			}	
+				log.trace( nGram );
+				temporalNGrams.add( new TemporalNGram( nGram, temporalStringSequence.getTimestamp() ) );
+			}
+			try {
+				queue.put( temporalNGrams );
+			} catch (InterruptedException e) {
+				log.error( "Error while waiting for free space to become available on queue", e );
+			}		
 		}
 	}
 
@@ -78,15 +86,6 @@ public class TemporalNGramSource implements Runnable {
 	 */
 	public void shutdown() {
 		this.shutdown = true;
-	}
-	
-	/**
-	 * Remove characters from the string sequence that will cause problems with our identification of n-grams
-	 * @param stringSequence The string to be cleaned up
-	 * @return The cleaned string with characters removed
-	 */
-	private String cleanStringSequence( String stringSequence ) {
-		return stringSequence.replaceAll( "\\.|,|!|\\?|\\(|\\)|\\r|\\n", "" ).toLowerCase().trim();
 	}
 
 	public int getnStart() {
