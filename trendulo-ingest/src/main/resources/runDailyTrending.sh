@@ -14,5 +14,6 @@ password=
 today=`date -d "-1 day" +"%Y%m%d"`
 yesterday=`date -d "-2 day" +"%Y%m%d"`
 
-command="${ACCUMULO_HOME}/bin/tool.sh $path_to_trendulo_ingest_jar  $trending_class $instance $zookeepers $tweets_table $trends DAY $yesterday $today -u $user -p $password"
+command="${ACCUMULO_HOME}/bin/tool.sh $path_to_trendulo_ingest_jar  $trending_class $instance $zookeepers $tweets_table $trends_table DAY $yesterday $today -u $user -p $password"
 echo $command;
+$command;
