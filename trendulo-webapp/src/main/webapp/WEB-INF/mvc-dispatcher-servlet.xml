@@ -12,7 +12,7 @@
 	<context:component-scan base-package="trendulo.web.controller" />
 	<context:annotation-config />
 	<mvc:annotation-driven />
-	<mvc:resources mapping="/static/**" location="/static/" />
+	<!-- <mvc:resources mapping="/static/**" location="/static/" />  -->
 
 	<bean id="propertyConfigurer"
 		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
@@ -32,6 +32,10 @@
 	</bean>
 	
 	<bean id="queryService" class="trendulo.web.query.QueryService">
+	</bean>
+	
+	<bean id="totalRowId" class="java.lang.String">
+		<constructor-arg value="${web.accumulo.totalRowId}"/>
 	</bean>
 	
 	<bean id="zooKeeperInstance" class="org.apache.accumulo.core.client.ZooKeeperInstance">
