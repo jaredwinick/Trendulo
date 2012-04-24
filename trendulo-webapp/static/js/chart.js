@@ -1,11 +1,6 @@
-function buildChart( searchText, days, yAxisPercent ) {
-	var url;
-	if ( yAxisPercent == true ) {
-		url = '/trendulo/percents/' + searchText + '/' + days;
-	}
-	else {
-		url = '/trendulo/counts/' + searchText + '/' + days;
-	}
+function buildChart( searchText, days ) {
+	var url = 'timeline/' + searchText + '/' + days;
+
 	$.getJSON( url, function(data) {
 		var chart = new Highcharts.StockChart({
 			chart : {
@@ -14,15 +9,22 @@ function buildChart( searchText, days, yAxisPercent ) {
 			title: {
 				text: ''
 			},
+			yAxis : {
+				min: 0
+			},
 			series: data,
 			credits : {
 				enabled : false
+			},
+			navigator : {
+				enabled : true,
+				baseSeries: 0
 			},
 			rangeSelector : {
 				enabled : false
 			},
 			tooltip : {
-				yDecimals : 4
+				yDecimals : 3
 			}
 		});
 	});
