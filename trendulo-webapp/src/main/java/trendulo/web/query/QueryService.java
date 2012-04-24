@@ -66,6 +66,11 @@ public class QueryService {
 	public Map<String, SortedMap<String,Long>> getCounts( String [] words, String startDateString, String endDateString ) {
 		
 		Map<String,SortedMap<String,Long>> wordDateCounters = new HashMap<String, SortedMap<String,Long>>();
+		// initialize the wordDateCounters so that we have at least an empty SortedMap for each word
+		for ( String word : words ) {
+			wordDateCounters.put( word, new TreeMap<String,Long>() );
+		}
+		
 		// set the granularity based on the length of the string passed in
 		String dateGranularity = ( startDateString.length() == 8 ) ? "DAY" : "HOUR";
 		
