@@ -169,7 +169,7 @@ public class TwitterStreamingStringSequenceSource implements
 	}
 	@Override
 	public void onTrackLimitationNotice(int numberOfLimitedStatuses) {
-		// TODO Auto-generated method stub
+		log.info( "LIMITED STATUSES: " + numberOfLimitedStatuses );
 		
 	}
 	@Override
