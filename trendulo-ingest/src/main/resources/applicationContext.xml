@@ -37,6 +37,9 @@
 		<constructor-arg ref="zooKeeperInstance" />
 		<constructor-arg ref="connector" />
 		<constructor-arg ref="batchWriter" />
+		<property name="nGramCounterRowId" value="${ingest.nGramCounterRowId}"/>
+		<property name="totalSequencesRowId" value="${ingest.totalSequencesRowId}"/>
+		<property name="gmtOffset" value="${ingest.gmtOffset}"/>
 	</bean>
 	
 	<bean id="zooKeeperInstance" class="org.apache.accumulo.core.client.ZooKeeperInstance">
