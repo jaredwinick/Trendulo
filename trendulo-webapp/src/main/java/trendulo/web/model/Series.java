@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.SortedMap;
 
-import trendulo.web.util.DateConverter;
+import trendulo.web.date.DateConverter;
 
 public class Series {
 	
@@ -46,7 +46,13 @@ public class Series {
 			long timestamp = DateConverter.dateStringToTimestamp( dateCounter.getKey() );
 			// get the total count for this date
 			long total = totalCounters.get( dateCounter.getKey() );
-			data.add( new Double [] { new Double(timestamp), new Double((double)dateCounter.getValue() / (double)total) * 100d } );
+			// Avoid a divide by 0 if we simply don't have data for this time
+			if ( total != 0 ) {
+				data.add( new Double [] { new Double(timestamp), new Double((double)dateCounter.getValue() / (double)total) * 100d } );
+			}
+			else {
+				data.add( new Double [] { new Double(timestamp), 0d } );
+			}
 		}
 	}
 	
