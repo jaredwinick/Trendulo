@@ -16,9 +16,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import trendulo.web.date.DateConverter;
 import trendulo.web.model.Series;
 import trendulo.web.query.QueryService;
-import trendulo.web.util.DateConverter;
 
 @Controller
 public class CountsController {
@@ -47,13 +47,28 @@ public class CountsController {
 	}
 	*/
 	
-	@RequestMapping(value = "/percents/{wordsCsvList}/{days}", method = RequestMethod.GET)
+	@RequestMapping(value = "/timeline/{wordsCsvList}/{days}", method = RequestMethod.GET)
 	public @ResponseBody List<Series> getPercentsSeries( @PathVariable String wordsCsvList, @PathVariable int days ) {
 		
 		// Add the total n-grams key to the list of words
 		String wordsCsvListPlusTotal = (wordsCsvList + "," + totalRowId);
 		
-		Map<String,SortedMap<String,Long>> wordDateCounters = getWordDateCounters( wordsCsvListPlusTotal, days );
+		// Get the current time in UTC and get the start and stop date strings
+		DateTime currentTime = new DateTime( DateTimeZone.UTC );
+		String startDateString = DateConverter.getStartDateString( days, currentTime.getMillis() );
+		String endDateString = DateConverter.getEndDateString( days, currentTime.getMillis() );
+		
+		Map<String,SortedMap<String,Long>> wordDateCounters = getWordDateCounters( wordsCsvListPlusTotal, startDateString, endDateString, days );
+		
+		// fill in any empty dateCounters with 0 for each word
+		List<String> dateStrings = DateConverter.getDateStringsForRange(startDateString, endDateString, days);
+		for ( Entry<String,SortedMap<String,Long>> entry : wordDateCounters.entrySet() ) {
+			for ( String dateString : dateStrings ) {
+				if ( !entry.getValue().containsKey(dateString) ) {
+					entry.getValue().put( dateString, new Long(0) );
+				}
+			}
+		}
 		
 		// Get the counters for the total n-grams
 		SortedMap<String,Long> totalNGramCounters = wordDateCounters.get( totalRowId );
@@ -62,30 +77,23 @@ public class CountsController {
 		// Iterate from the original wordsCsvList so the series is returned in the order queried
 		List<Series> series = new ArrayList<Series>();
 		for ( String word : wordsCsvList.split(",") ) {
-			series.add( new Series( word, wordDateCounters.get( word ), totalNGramCounters ) );
+			String trimmedWord = word.trim();
+			series.add( new Series( trimmedWord, wordDateCounters.get( trimmedWord ), totalNGramCounters ) );
 		}
-		/*
-		for ( Entry<String, SortedMap<String,Long>> entry : wordDateCounters.entrySet() ) {
-			// only add to the series for real words, not the total n-grams
-			if ( !entry.getKey().equals( totalRowId ) ) {
-				series.add( new Series( entry.getKey(), entry.getValue(), totalNGramCounters ) );
-			}
-		}
-		*/
+
 		return series;
 	}
 	
-	private Map<String,SortedMap<String,Long>> getWordDateCounters( String wordsCsvList, int days ) {
+	private Map<String,SortedMap<String,Long>> getWordDateCounters( String wordsCsvList, String startDateString, String endDateString, int days ) {
 		log.debug( "Words:" + wordsCsvList );
 		log.debug( "Days:" + days );
 		
 		// words can be a comma seperated list so split
 		String [] words = wordsCsvList.split( "," );
-
-		// Get the current time in UTC
-		DateTime currentTime = new DateTime( DateTimeZone.UTC );
-		String startDateString = DateConverter.getStartDateString( days, currentTime.getMillis() );
-		String endDateString = DateConverter.getEndDateString( days, currentTime.getMillis() );
+		// trim leading and trailing white space from each word
+		for ( int i = 0 ; i < words.length ; ++i ) {
+			words[i] = words[i].trim();
+		}
 		Map<String,SortedMap<String,Long>> wordDateCounters = queryService.getCounts( words, startDateString, endDateString );
 		
 		return wordDateCounters;
