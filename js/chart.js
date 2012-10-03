@@ -14,8 +14,8 @@
 // limitations under the License.
 // =================================================================================================
 
-function buildChart( searchText, days ) {
-	var url = 'timeline/' + searchText + '/' + days;
+function buildChart( days ) {
+	var url = 'data/bld_' + days + '.json';
 
 	$.getJSON( url, function(data) {
 		var chart = new Highcharts.StockChart({
