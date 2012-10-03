@@ -1,0 +1,13 @@
+body {
+	padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
+}
+.trendsLabel { font-size: 28px; font-weight: bold; bottom: 0; position: absolute; }
+.ngram-0 { color: #4572A7; }
+.ngram-1 { color: #AA4643; }
+.ngram-2 { color: #89A54E; }
+.ngram-3 { color: #80699B; }
+.ngram-4 { color: #3D96AE; }
+.ngram-5 { color: #DB843D; }
+.ngram-6 { color: #92A8CD; }
+.ngram-7 { color: #A47D7C; }
+.ngram-8 { color: #B5CA92; }
